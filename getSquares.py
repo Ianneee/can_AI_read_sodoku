@@ -26,9 +26,9 @@ def getSquares():
                         quadratini.append(quadrato)
 
         #mostro l'immagine ed esco premendo f ; si può usare per debug
-        cv2.imshow("grid",quadratini[2]) 
-        if cv2.waitKey(0) and 0xff == ord('f'):
-                cv2.destroyAllWindows()
+        # cv2.imshow("grid",quadratini[2]) 
+        # if cv2.waitKey(0) and 0xff == ord('f'):
+        #         cv2.destroyAllWindows()
 
 
         return quadratini
@@ -117,6 +117,8 @@ def getBirdEye(img,src_points):
         warped = cv2.warpPerspective(img,BE,(900,900))
         return warped
 
+if __name__ == '__main__':
+        getSquares()
 
 
 
