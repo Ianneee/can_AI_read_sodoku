@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "can-ai-solve-sodoku"
+version = "0.1"
+description = ""
+authors = ["Ian Cini", "Tommaso Mattei"]
+license = "MIT"
+readme = "README.md"
+#packages = [{include = "can_ai_solve_sodoku"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+numpy = "^1.25.2"
+opencv-contrib-python = "^4.8.0.74"
+pandas = "^2.0.3"
+matplotlib = "^3.7.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
