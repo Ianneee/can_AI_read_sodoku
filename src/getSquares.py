@@ -1,13 +1,15 @@
 import cv2
 import numpy as np
+from typing import Union
 
 #Funzione che ottiene gli 81 quadratini come singole immagini in una lista
-def getSquares():
+def getSquares(video: Union[None, cv2.VideoCapture]):
         # Catturo dalla fotocamera
-        video = cv2.VideoCapture(0) 
+        if not video:
+            video = cv2.VideoCapture(0)
 
         #succ è un booleano che comunica il successo o meno, img è l'immagine catturata
-        succ, img = video.read()
+        _, img = video.read()
         img = cv2.resize(img,(1080,940))
 
         contours = getContours(img) #Contorni
@@ -26,9 +28,9 @@ def getSquares():
                         quadratini.append(quadrato)
 
         #mostro l'immagine ed esco premendo f ; si può usare per debug
-        # cv2.imshow("grid",quadratini[2]) 
-        # if cv2.waitKey(0) and 0xff == ord('f'):
-        #         cv2.destroyAllWindows()
+        #cv2.imshow("grid",quadratini[2])
+        #if cv2.waitKey(0) and 0xff == ord('f'):
+        #        cv2.destroyAllWindows()
 
 
         return quadratini
@@ -56,45 +58,45 @@ def getContours(img):
 #Funzione che prende le coordinate dei quattro angoli identificando il contorno del sudoku nell'immagine
 def getSrcPoints(img,contours):
         #scelgo soltanto il quadrato esterno della griglia del sudoku
-        for x in contours:
-                if cv2.contourArea(x) > 90000:
-                        # print(cv2.contourArea(x))
-                        epsilon = 0.01 * cv2.arcLength(x,True) #Calcolo l'epsilon per la semplificazine del poligono
-                        approx = cv2.approxPolyDP(x,epsilon,True) #Approssimo ad un poligono 
-                        if len(approx) ==4: #proseguo solo se è un rettangolo
-                                cv2.drawContours(img,[approx],0,(0,255,0),2) #disegno sull'immagine (Utile se si vuole printare per debug)
-                                n = approx.ravel() #appiattisco l'array (Equivalente di shape -1)
-                                middle = img.shape[1]//2 #metà della larghezza dell'immagine
-                                src_points = np.zeros((4,2)) #array che conterrà le coordinate degli angoli ordinate
-                                listaSX = np.zeros((2,2))
-                                listaDX = np.zeros((2,2))
-                                #algoritmo per ordinare le coordinate degli angoli:
-                                #si trovano i due angoli più a sinistra e si ordinano dal più alto al più basso
-                                #lo stesso vale per i due angoli a destra
-                                #alla fine si inseriscono prima quelli di sinistra e poi quelli di destra nell'array finale.
-                                for i,y in enumerate(n):
-                                        if i%2 == 0:
-                                                if y < middle:
-                                                        if listaSX[0][0] == 0:
-                                                                listaSX[0] = (y,n[i+1])
-                                                        else:
-                                                                if listaSX[0][1] < n[i+1]:
-                                                                        listaSX[1] = (y,n[i+1])
-                                                                else:
-                                                                        listaSX[1] = listaSX[0] 
-                                                                        listaSX[0] = (y,n[i+1])
-                                                else:
-                                                        if listaDX[0][0] == 0:
-                                                                listaDX[0] = (y,n[i+1])
-                                                        else:
-                                                                if listaDX[0][1] < n[i+1]:
-                                                                        listaDX[1] = (y,n[i+1])
-                                                                else:
-                                                                        listaDX[1] = listaDX[0] 
-                                                                        listaDX[0] = (y,n[i+1])
-                                src_points = np.array([listaSX[0],listaSX[1],listaDX[0],listaDX[1]], dtype = np.float32) #array che contiene le coordinate degli angoli ordinate (UpperSX,LowerSX,UpperDX,LowerDX)
-                                break
-        return src_points
+    for x in contours:
+        if cv2.contourArea(x) > 90000:
+            # print(cv2.contourArea(x))
+            epsilon = 0.01 * cv2.arcLength(x,True) #Calcolo l'epsilon per la semplificazine del poligono
+            approx = cv2.approxPolyDP(x,epsilon,True) #Approssimo ad un poligono
+            if len(approx) ==4: #proseguo solo se è un rettangolo
+                cv2.drawContours(img,[approx],0,(0,255,0),2) #disegno sull'immagine (Utile se si vuole printare per debug)
+                n = approx.ravel() #appiattisco l'array (Equivalente di shape -1)
+                middle = img.shape[1]//2 #metà della larghezza dell'immagine
+                src_points = np.zeros((4,2)) #array che conterrà le coordinate degli angoli ordinate
+                listaSX = np.zeros((2,2))
+                listaDX = np.zeros((2,2))
+                #algoritmo per ordinare le coordinate degli angoli:
+                #si trovano i due angoli più a sinistra e si ordinano dal più alto al più basso
+                #lo stesso vale per i due angoli a destra
+                #alla fine si inseriscono prima quelli di sinistra e poi quelli di destra nell'array finale.
+                for i,y in enumerate(n):
+                    if i%2 == 0:
+                        if y < middle:
+                            if listaSX[0][0] == 0:
+                                listaSX[0] = (y,n[i+1])
+                            else:
+                                if listaSX[0][1] < n[i+1]:
+                                    listaSX[1] = (y,n[i+1])
+                                else:
+                                    listaSX[1] = listaSX[0]
+                                    listaSX[0] = (y,n[i+1])
+                        else:
+                            if listaDX[0][0] == 0:
+                                listaDX[0] = (y,n[i+1])
+                            else:
+                                if listaDX[0][1] < n[i+1]:
+                                    listaDX[1] = (y,n[i+1])
+                                else:
+                                    listaDX[1] = listaDX[0]
+                                    listaDX[0] = (y,n[i+1])
+                src_points = np.array([listaSX[0],listaSX[1],listaDX[0],listaDX[1]], dtype = np.float32) #array che contiene le coordinate degli angoli ordinate (UpperSX,LowerSX,UpperDX,LowerDX)
+                break
+    return src_points
 
 
 
