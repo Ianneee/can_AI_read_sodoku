@@ -1,0 +1,2 @@
+class AnglesNotFound(Exception):
+    pass
