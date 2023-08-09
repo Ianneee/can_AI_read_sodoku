@@ -20,7 +20,9 @@ def getSquares(video: Union[None, cv2.VideoCapture] = None, img_path: Union[None
         contours = getContours(img) #Contorni
 
         src_points = getSrcPoints(contours) #Coordinate sudoku
+        #src_points = getSrcPoints_threshold(contours) #Coordinate sudoku
         #src_points = getSrcPoints_o(img, contours) #Coordinate sudoku
+        print(src_points)
         if src_points is None:
             raise AnglesNotFound("Can't define the contour of the sodoku")
 
@@ -75,7 +77,7 @@ def getSrcPoints_o(img,contours):
             epsilon = 0.01 * cv2.arcLength(x,True) #Calcolo l'epsilon per la semplificazine del poligono
             approx = cv2.approxPolyDP(x,epsilon,True) #Approssimo ad un poligono
             if len(approx) ==4: #proseguo solo se è un rettangolo
-                cv2.drawContours(img,[approx],0,(0,255,0),2) #disegno sull'immagine (Utile se si vuole printare per debug)
+                #cv2.drawContours(img,[approx],0,(0,255,0),2) #disegno sull'immagine (Utile se si vuole printare per debug)
                 n = approx.ravel() #appiattisco l'array (Equivalente di shape -1)
                 middle = img.shape[1]//2 #metà della larghezza dell'immagine
                 src_points = np.zeros((4,2)) #array che conterrà le coordinate degli angoli ordinate
@@ -129,9 +131,31 @@ def getSrcPoints(contours, area=True):
         # Separate left xs from right xs and sort on y
         ls = a[:, 0] <= mid
         rs = a[:, 0] > mid
-        ls = np.sort(a[ls], axis=0)
+        ls = np.sort(a[ls], axis=1)
         rs = np.sort(a[rs], axis=0)
         return np.concatenate((ls, rs), axis=0)
+
+
+def getSrcPoints_threshold(contours):
+
+    for c in contours:
+        if cv2.contourArea(c) > 90000:
+            #Calcolo l'epsilon per la semplificazine del poligono
+            epsilon = 0.01 * cv2.arcLength(c,True)
+            #Approssimo ad un poligono
+            approx = cv2.approxPolyDP(c,epsilon,True)
+            #proseguo solo se è un rettangolo
+            if len(approx) == 4:
+                a = approx.reshape(4, 2).astype(np.float32)
+                # OuterBox middle is minimum x plus half distance from maximum x
+                mid = np.min(a[:, 0]) + (np.max(a[:,0]) - np.min(a[:,0])) / 2
+                # Separate left xs from right xs and sort on y
+                ls = a[:, 0] <= mid
+                rs = a[:, 0] > mid
+                ls = np.sort(a[ls], axis=1)
+                rs = np.sort(a[rs], axis=0)
+                return np.concatenate((ls, rs), axis=0)
+
 
 
 #Funzione che date le coordinate degli angoli dell'immagine ridà una vista dall'alto della stessa
@@ -152,3 +176,5 @@ def getBirdEye(img,src_points):
         warped = cv2.warpPerspective(img,BE,(900,900))
         return warped
 
+if __name__ == "__main__":
+    getSquares(img_path="Sudoku.jpg")
