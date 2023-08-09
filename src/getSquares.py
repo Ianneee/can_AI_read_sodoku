@@ -1,22 +1,33 @@
 import cv2
 import numpy as np
+from errorsClass import AnglesNotFound
 from typing import Union
 
 #Funzione che ottiene gli 81 quadratini come singole immagini in una lista
-def getSquares(video: Union[None, cv2.VideoCapture]):
+def getSquares(video: Union[None, cv2.VideoCapture] = None, img_path: Union[None, str] = None):
         # Catturo dalla fotocamera
-        if not video:
-            video = cv2.VideoCapture(0)
+        if not video and not img_path:
+            raise AttributeError("You need to provide at least one argument.")
 
-        #succ è un booleano che comunica il successo o meno, img è l'immagine catturata
-        _, img = video.read()
+        if video:
+            video = cv2.VideoCapture(0)
+            _, img = video.read()
+        elif img_path:
+            img = cv2.imread(img_path)
+
         img = cv2.resize(img,(1080,940))
 
         contours = getContours(img) #Contorni
 
-        src_points = getSrcPoints(img,contours) #Coordinate sudoku
+        src_points = getSrcPoints(contours) #Coordinate sudoku
+        #src_points = getSrcPoints_o(img, contours) #Coordinate sudoku
+        if src_points is None:
+            raise AnglesNotFound("Can't define the contour of the sodoku")
 
         warped = getBirdEye(img,src_points) #Sudoku dall'alto
+
+        cv2.imshow("W", warped)
+        cv2.waitKey(0)
 
         #ottengo i singoli quadratini del sudoku dividendo in 9 righe uguali l'immagine
         righe = np.vsplit(warped,9)
@@ -28,7 +39,7 @@ def getSquares(video: Union[None, cv2.VideoCapture]):
                         quadratini.append(quadrato)
 
         #mostro l'immagine ed esco premendo f ; si può usare per debug
-        #cv2.imshow("grid",quadratini[2])
+        #cv2.imshow("grid",quadratini[0])
         #if cv2.waitKey(0) and 0xff == ord('f'):
         #        cv2.destroyAllWindows()
 
@@ -56,7 +67,7 @@ def getContours(img):
 
 
 #Funzione che prende le coordinate dei quattro angoli identificando il contorno del sudoku nell'immagine
-def getSrcPoints(img,contours):
+def getSrcPoints_o(img,contours):
         #scelgo soltanto il quadrato esterno della griglia del sudoku
     for x in contours:
         if cv2.contourArea(x) > 90000:
@@ -98,7 +109,30 @@ def getSrcPoints(img,contours):
                 break
     return src_points
 
+def getSrcPoints(contours, area=True):
+    if area:
+        # The bounding box is the one with the bigger area
+        outer = sorted(contours, key=cv2.contourArea, reverse=True)
+    else:
+        # The bounding box is the one with the bigger perimeter
+        outer = sorted(contours, key=lambda x: cv2.arcLength(x, True), reverse=True)
 
+    #Calcolo l'epsilon per la semplificazine del poligono
+    for o in outer:
+        epsilon = 0.02 * cv2.arcLength(o,True)
+        #Approssimo ad un poligono
+        approx = cv2.approxPolyDP(o,epsilon,True)
+        #proseguo solo se è un rettangolo
+        if len(approx) == 4:
+            a = approx.reshape(4, 2).astype(np.float32)
+            # OuterBox middle is minimum x plus half distance from maximum x
+            mid = np.min(a[:, 0]) + (np.max(a[:,0]) - np.min(a[:,0])) / 2
+            # Separate left xs from right xs and sort on y
+            ls = a[:, 0] <= mid
+            rs = a[:, 0] > mid
+            ls = np.sort(a[ls], axis=0)
+            rs = np.sort(a[rs], axis=0)
+            return np.concatenate((ls, rs), axis=0)
 
 
 #Funzione che date le coordinate degli angoli dell'immagine ridà una vista dall'alto della stessa
@@ -118,12 +152,4 @@ def getBirdEye(img,src_points):
         #applicazione di Bird eye view all'immagine originale
         warped = cv2.warpPerspective(img,BE,(900,900))
         return warped
-
-if __name__ == '__main__':
-        getSquares()
-
-
-
-
-
 
