@@ -77,8 +77,10 @@ def getSrcPoints_o(img,contours):
             epsilon = 0.01 * cv2.arcLength(x,True) #Calcolo l'epsilon per la semplificazine del poligono
             approx = cv2.approxPolyDP(x,epsilon,True) #Approssimo ad un poligono
             if len(approx) ==4: #proseguo solo se è un rettangolo
+                print(approx)
                 #cv2.drawContours(img,[approx],0,(0,255,0),2) #disegno sull'immagine (Utile se si vuole printare per debug)
                 n = approx.ravel() #appiattisco l'array (Equivalente di shape -1)
+                print(n)
                 middle = img.shape[1]//2 #metà della larghezza dell'immagine
                 src_points = np.zeros((4,2)) #array che conterrà le coordinate degli angoli ordinate
                 listaSX = np.zeros((2,2))
@@ -129,11 +131,11 @@ def getSrcPoints(contours, area=True):
         # OuterBox middle is minimum x plus half distance from maximum x
         mid = np.min(a[:, 0]) + (np.max(a[:,0]) - np.min(a[:,0])) / 2
         # Separate left xs from right xs and sort on y
-        ls = a[:, 0] <= mid
-        rs = a[:, 0] > mid
-        ls = np.sort(a[ls], axis=1)
-        rs = np.sort(a[rs], axis=0)
-        return np.concatenate((ls, rs), axis=0)
+        ls = a[a[:, 0] <= mid]
+        rs = a[a[:, 0] > mid]
+        sort_ls = np.argsort(ls[:, 1])
+        sort_rs = np.argsort(rs[:, 1])
+        return np.concatenate((ls[sort_ls], rs[sort_rs]))
 
 
 def getSrcPoints_threshold(contours):
@@ -150,12 +152,11 @@ def getSrcPoints_threshold(contours):
                 # OuterBox middle is minimum x plus half distance from maximum x
                 mid = np.min(a[:, 0]) + (np.max(a[:,0]) - np.min(a[:,0])) / 2
                 # Separate left xs from right xs and sort on y
-                ls = a[:, 0] <= mid
-                rs = a[:, 0] > mid
-                ls = np.sort(a[ls], axis=1)
-                rs = np.sort(a[rs], axis=0)
-                return np.concatenate((ls, rs), axis=0)
-
+                ls = a[a[:, 0] <= mid]
+                rs = a[a[:, 0] > mid]
+                sort_ls = np.argsort(ls[:, 1])
+                sort_rs = np.argsort(rs[:, 1])
+                return np.concatenate((ls[sort_ls], rs[sort_rs]))
 
 
 #Funzione che date le coordinate degli angoli dell'immagine ridà una vista dall'alto della stessa
@@ -177,4 +178,4 @@ def getBirdEye(img,src_points):
         return warped
 
 if __name__ == "__main__":
-    getSquares(img_path="Sudoku.jpg")
+    getSquares(img_path="webcam.jpeg")
