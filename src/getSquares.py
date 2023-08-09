@@ -22,14 +22,15 @@ def getSquares(video: Union[None, cv2.VideoCapture] = None, img_path: Union[None
         src_points = getSrcPoints(contours) #Coordinate sudoku
         #src_points = getSrcPoints_threshold(contours) #Coordinate sudoku
         #src_points = getSrcPoints_o(img, contours) #Coordinate sudoku
-        print(src_points)
         if src_points is None:
             raise AnglesNotFound("Can't define the contour of the sodoku")
 
         warped = getBirdEye(img,src_points) #Sudoku dall'alto
+        warped = cv2.resize(warped, (540, 540))
 
-        cv2.imshow("W", warped)
-        cv2.waitKey(0)
+        cv2.imshow("Sudoku!", warped)
+        cv2.waitKey(1)
+        cv2.displayStatusBar("Sudoku!", 'Press k for close this window', 0)
 
         #ottengo i singoli quadratini del sudoku dividendo in 9 righe uguali l'immagine
         righe = np.vsplit(warped,9)
@@ -77,10 +78,8 @@ def getSrcPoints_o(img,contours):
             epsilon = 0.01 * cv2.arcLength(x,True) #Calcolo l'epsilon per la semplificazine del poligono
             approx = cv2.approxPolyDP(x,epsilon,True) #Approssimo ad un poligono
             if len(approx) ==4: #proseguo solo se è un rettangolo
-                print(approx)
                 #cv2.drawContours(img,[approx],0,(0,255,0),2) #disegno sull'immagine (Utile se si vuole printare per debug)
                 n = approx.ravel() #appiattisco l'array (Equivalente di shape -1)
-                print(n)
                 middle = img.shape[1]//2 #metà della larghezza dell'immagine
                 src_points = np.zeros((4,2)) #array che conterrà le coordinate degli angoli ordinate
                 listaSX = np.zeros((2,2))
