@@ -10,7 +10,7 @@ def getSquares(video: Union[None, cv2.VideoCapture] = None, img_path: Union[None
             raise AttributeError("You need to provide at least one argument.")
 
         if video:
-            video = cv2.VideoCapture(0)
+            # video = cv2.VideoCapture(0)
             _, img = video.read()
         elif img_path:
             img = cv2.imread(img_path)
