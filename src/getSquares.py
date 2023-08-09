@@ -112,27 +112,26 @@ def getSrcPoints_o(img,contours):
 def getSrcPoints(contours, area=True):
     if area:
         # The bounding box is the one with the bigger area
-        outer = sorted(contours, key=cv2.contourArea, reverse=True)
+        outer = max(contours, key=cv2.contourArea)
     else:
         # The bounding box is the one with the bigger perimeter
-        outer = sorted(contours, key=lambda x: cv2.arcLength(x, True), reverse=True)
+        outer = max(contours, key=lambda x: cv2.arcLength(x, True))
 
     #Calcolo l'epsilon per la semplificazine del poligono
-    for o in outer:
-        epsilon = 0.02 * cv2.arcLength(o,True)
-        #Approssimo ad un poligono
-        approx = cv2.approxPolyDP(o,epsilon,True)
-        #proseguo solo se è un rettangolo
-        if len(approx) == 4:
-            a = approx.reshape(4, 2).astype(np.float32)
-            # OuterBox middle is minimum x plus half distance from maximum x
-            mid = np.min(a[:, 0]) + (np.max(a[:,0]) - np.min(a[:,0])) / 2
-            # Separate left xs from right xs and sort on y
-            ls = a[:, 0] <= mid
-            rs = a[:, 0] > mid
-            ls = np.sort(a[ls], axis=0)
-            rs = np.sort(a[rs], axis=0)
-            return np.concatenate((ls, rs), axis=0)
+    epsilon = 0.02 * cv2.arcLength(outer,True)
+    #Approssimo ad un poligono
+    approx = cv2.approxPolyDP(outer,epsilon,True)
+    #proseguo solo se è un rettangolo
+    if len(approx) == 4:
+        a = approx.reshape(4, 2).astype(np.float32)
+        # OuterBox middle is minimum x plus half distance from maximum x
+        mid = np.min(a[:, 0]) + (np.max(a[:,0]) - np.min(a[:,0])) / 2
+        # Separate left xs from right xs and sort on y
+        ls = a[:, 0] <= mid
+        rs = a[:, 0] > mid
+        ls = np.sort(a[ls], axis=0)
+        rs = np.sort(a[rs], axis=0)
+        return np.concatenate((ls, rs), axis=0)
 
 
 #Funzione che date le coordinate degli angoli dell'immagine ridà una vista dall'alto della stessa
