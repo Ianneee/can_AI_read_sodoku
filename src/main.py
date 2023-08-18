@@ -28,7 +28,6 @@ def draw_numbers(predictions, sodoku_img):
                 x = int(j * s + 5)
                 y = int(i * s + 30)
                 cv2.putText(sodoku_img,str(q),(x,y),cv2.FONT_HERSHEY_DUPLEX,1,(0,0,255),1)
-                cv2.waitKey(1)
 
     cv2.imshow("Sudoku!", sodoku_img)
     cv2.waitKey(1)

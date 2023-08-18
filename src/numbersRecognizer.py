@@ -50,7 +50,6 @@ class NumbersRecognizer():
             blank = np.zeros(masked.shape, dtype="uint8")
             if np.sum(masked) != 0:
 
-                blank = np.zeros(masked.shape, dtype="uint8")
                 contours, _ = cv2.findContours(masked,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
                 cont = max(contours, key=cv2.contourArea)
 
@@ -63,16 +62,13 @@ class NumbersRecognizer():
         self.cleaned_data = [];
         self.predictions = []
         self.clean_images(sudoku_cells)
-        for i in range(9):
-            for j in range(9):
-                q = self.cleaned_data[i*9+j]
+        for q in self.cleaned_data:
+            if np.sum(q) != 0:
+                tf = transforms.Compose([transforms.ToTensor()])
+                img = tf(q).float().unsqueeze(0)
+                pred = self.model(img)
+                self.predictions.append(pred.data.numpy().argmax())
 
-                if np.sum(q) != 0:
-                    tf = transforms.Compose([transforms.ToTensor()])
-                    img = tf(q).float().unsqueeze(0)
-                    pred = self.model(img)
-                    self.predictions.append(pred.data.numpy().argmax())
-
-                else:
-                    self.predictions.append(None)
+            else:
+                self.predictions.append(None)
 
