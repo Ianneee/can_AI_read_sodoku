@@ -46,8 +46,8 @@ class NumbersRecognizer():
             # Remove borders from image
             masked = cv2.bitwise_and(edges, edges, mask=mask)
 
-            n = np.zeros(masked.shape, dtype="uint8")
             blank = np.zeros(masked.shape, dtype="uint8")
+
             if np.sum(masked) != 0:
 
                 contours, _ = cv2.findContours(masked,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
@@ -55,16 +55,15 @@ class NumbersRecognizer():
 
                 cv2.drawContours(blank, [cont], -1, (255, 255, 255), thickness=cv2.FILLED)
 
-                n = cv2.bitwise_and(blank, blank, masked)
-            self.cleaned_data.append(n)
+            self.cleaned_data.append(blank)
 
     def recognize(self, sudoku_cells):
         self.cleaned_data = [];
         self.predictions = []
         self.clean_images(sudoku_cells)
+        tf = transforms.Compose([transforms.ToTensor()])
         for q in self.cleaned_data:
             if np.sum(q) != 0:
-                tf = transforms.Compose([transforms.ToTensor()])
                 img = tf(q).float().unsqueeze(0)
                 pred = self.model(img)
                 self.predictions.append(pred.data.numpy().argmax())
