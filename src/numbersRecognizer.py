@@ -34,7 +34,7 @@ class NumbersRecognizer():
         for q in quads:
             resized = cv2.resize(q, (IMG_SIZE, IMG_SIZE))
 
-            # Sharp immag
+            # Sharp immage
             #smoothed = cv2.GaussianBlur(resized, (9,9), 10)
             #resized = cv2.addWeighted(resized, 1.5, smoothed, -0.5, 0)
 
@@ -46,6 +46,7 @@ class NumbersRecognizer():
             # Remove borders from image
             masked = cv2.bitwise_and(edges, edges, mask=mask)
 
+            # Empty black square for final number
             blank = np.zeros(masked.shape, dtype="uint8")
 
             if np.sum(masked) != 0:
@@ -61,7 +62,9 @@ class NumbersRecognizer():
         self.cleaned_data = [];
         self.predictions = []
         self.clean_images(sudoku_cells)
+
         tf = transforms.Compose([transforms.ToTensor()])
+
         for q in self.cleaned_data:
             if np.sum(q) != 0:
                 img = tf(q).float().unsqueeze(0)

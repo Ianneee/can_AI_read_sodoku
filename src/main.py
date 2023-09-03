@@ -14,11 +14,13 @@ def open_file_dialog():
     print("Selected file:", file_path)
 
 
+# Diplay sudoku cells given to cnn
 def display_boxes(boxs, i):
     cv2.imshow('Results', boxs[i])
     cv2.displayStatusBar("Results", 'Navigation n: next | p: previous', 0)
 
 
+# Draw recognized numbers over sudoku picture
 def draw_numbers(predictions, sodoku_img):
     s = SODOKU_SIZE / 9
     for i in range(9):
@@ -42,6 +44,7 @@ def main():
 
     rec = NumbersRecognizer()
 
+    # File dialog
     root = tk.Tk()
     root.withdraw()
 
@@ -58,9 +61,11 @@ def main():
 
         k = cv2.waitKey(30)
         try:
+            # Quit
             if k == ord('q'):
                 exit(0)
 
+            # Picture from webcam
             elif k == ord('s'):
                 boxs, warped = gs.getSquares(video=video)
                 i = 0
@@ -69,6 +74,7 @@ def main():
                 display_boxes(boxs, i)
                 draw_numbers(rec.predictions, warped)
 
+            # Picture from file
             elif k == ord('f'):
                 file_path = filedialog.askopenfilename()
                 boxs, warped = gs.getSquares(img_path=file_path)
@@ -78,14 +84,17 @@ def main():
                 display_boxes(boxs, i)
                 draw_numbers(rec.predictions, warped)
 
+            # Navigate sudoku cells window
             elif k == ord('n'):
                 i = (i + 1) % 81
                 display_boxes(boxs, i)
 
+            # Navigate sudoku cells window
             elif k == ord('p'):
                 i = (i - 1) % 81
                 display_boxes(boxs, i)
 
+            # Close sudoku picture
             elif k == ord('k'):
                 cv2.destroyWindow("Sudoku!")
 
