@@ -5,17 +5,17 @@ It is possible to obtain recognition by either capturing a photo via webcam or b
 
 
 ## Files structure
-- rc/cnn.ypynb: Convolutional Neural Network with corresponding functions.
+- **rc/cnn.ypynb**: Convolutional Neural Network with corresponding functions.
 
-- src/digitsCnn.py: The same CNN as in the notebook for use in predictions.
+- **src/digitsCnn.py**: The same CNN as in the notebook for use in predictions.
 
-- src/errorsClass.py: Error classes.
+- **src/errorsClass.py**: Error classes.
 
-- src/getSquares.py: Obtaining the 81 squares of the Sudoku.
+- **src/getSquares.py**: Obtaining the 81 squares of the Sudoku.
 
-- src/main.py: Main program.
+- **src/main.py**: Main program.
 
-- src/numberRecongizer.py: Provides the CNN's predictions on the provided inputs.
+- **src/numberRecongizer.py**: Provides the CNN's predictions on the provided inputs.
 
 ## Program interface
 
